@@ -1,0 +1,289 @@
+\documentclass{article}
+
+\usepackage{amsmath,amssymb}
+
+\title{Univariate Exponentially Modified Gaussian Wave Mixture Model Optimization}
+
+\author{Christopher Hahne}
+
+\begin{document}
+
+\maketitle
+
+This document elaborates on a closed-form analytical solution to an Exponentially-Modified Gaussian (EMG) mixture model using least-squares optimization.
+
+\section{Objective}
+Let the Exponentially Modified Gaussian (EMG) be
+\begin{align}
+m(\mathbf{p}; \mathbf{x})=m(\alpha, \mu, \sigma,\lambda;\mathbf{x})= \alpha\,\mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi)
+\end{align}
+where $\mathbf{p}=\left[\alpha,\mu,\sigma,\lambda\right]$ and $\mathcal{N}(\mathbf{x}|\mu,\sigma)$ is the Gaussian function given by
+\begin{align}
+\mathcal{N}(\mathbf{x}|\mu,\sigma)=%\frac{1}{\sigma\sqrt{2\pi}}
+\exp\left(-\frac{\left(\mathbf{x}-\mu\right)^2}{2\sigma^2}\right)
+\end{align}
+with neglected normalization. The exponentially-modified term is modeled by
+\begin{align}
+\Phi(\mathbf{x}|\lambda,\mu,\sigma)=\left(1+ \text{erf}\left(\lambda\frac{\mathbf{x}-\mu}{\sigma\sqrt{2}}\right)\right)
+\end{align}
+and finally the oscillating term writes
+\begin{align}
+A(\mathbf{x}|\mu,f,\phi) = \cos\left(2 \pi f \left(\mathbf{x} - \mu\right) + \phi\right)
+\end{align}
+with frequency $f$ and phase $\phi$. Putting all terms together, the EMG writes
+\begin{align}
+m(\mathbf{p};\mathbf{x})=\alpha %\frac{1}{\sigma\sqrt{2\pi}}
+\exp\left(-\frac{\left(\mathbf{x}-\mu\right)^2}{2\sigma^2}\right) \left(1 + \text{erf}\left(\lambda\frac{\mathbf{x}-\mu}{\sigma\sqrt{2}}\right)\right) \cos\left(2 \pi f \left(\mathbf{x} - \mu\right) + \phi\right)
+\end{align}
+Now we introduce an EMG mixture model by
+\begin{align}
+M\left(\mathbf{P};\mathbf{x}\right)=\sum_{k=1}^K m\left(\mathbf{p}_k;\mathbf{x}\right)
+\end{align}
+with components $k=\{1,2,\dots,K\}$. For minimization, the loss function writes
+\begin{align}
+L\left(\mathbf{P}\right)=\left(y-M\left(\mathbf{P};\mathbf{x}\right)\right)^2
+\end{align}
+where $y$ represents the measurement data suffering from noise.
+\begin{align}
+\mathbf{P}^\star=\underset{\mathbf{P}}{\operatorname{arg\,min}} \, L\left(\mathbf{P}\right)
+\end{align}
+
+\section{Analytical Derivative}
+
+\begin{align}
+\frac{\partial L\left(\mathbf{P}\right)}{\partial \mathbf{P}}=\frac{\partial \left(y-M\left(\mathbf{P};\mathbf{x}\right)\right)^2}{\partial \mathbf{P}}
+\end{align}
+which becomes
+\begin{align}
+\frac{\partial L\left(\mathbf{P}\right)}{\partial \mathbf{P}}=2\left(y-M\left(\mathbf{P};\mathbf{x}\right)\right)\frac{\partial \left(y-M\left(\mathbf{P};\mathbf{x}\right)\right)}{\partial \mathbf{P}} \label{eq:chain_rule}
+\end{align}
+after employing the chain rule.
+\begin{align}
+\frac{\partial \left(y-M\left(\mathbf{P};\mathbf{x}\right)\right)}{\partial \mathbf{P}}= \frac{\partial y}{\partial \mathbf{P}} - \frac{\partial \left(\sum_k^K m\left(\mathbf{p}_k,\mathbf{x}\right)\right)}{\partial \mathbf{P}}= -\frac{\partial m\left(\mathbf{p}_k,\mathbf{x}\right)}{\partial \mathbf{P}}
+\end{align}
+where we exploited that only the $k$-th mixture component depends on $\mathbf{P}$
+
+\subsection{Partial derivative w.r.t. $\mu$}
+% d/du (y - a exp(-(x-u)²/(2s²))*(1+erf(l*(x-u)/(s*sqrt(2)))))²
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \mu} = \frac{\partial}{\partial \mu}\left(\alpha\,\mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi)\right)
+\end{align}
+which becomes
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \mu} = \alpha&\left(\Phi(\mathbf{x}|\lambda,\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi) \frac{\partial \mathcal{N}(\mathbf{x}|\mu,\sigma)}{\partial \mu} \right.
+\\  & + \mathcal{N}(\mathbf{x}|\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi) \frac{\partial \Phi(\mathbf{x}|\lambda,\mu,\sigma)}{\partial \mu}
+\\ & + \left. \mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma) \frac{\partial A(\mathbf{x}|\mu,f,\phi)}{\partial \mu} \right)
+\end{align}
+after applying the product rule.
+\begin{align}
+\frac{\partial \mathcal{N}(\mathbf{x}|\mu,\sigma)}{\partial \mu} = \frac{\partial}{\partial\mu} \exp\left(-\frac{\left(\mathbf{x}-\mu\right)^2}{2\sigma^2}\right) 
+\end{align}
+
+\begin{align}
+\frac{\partial \mathcal{N}(\mathbf{x}|\mu,\sigma)}{\partial \mu} = \frac{\mathbf{x}-\mu}{\sigma^2} \exp\left(-\frac{\left(\mathbf{x}-\mu\right)^2}{2\sigma^2}\right)
+\end{align}
+
+\begin{align}
+\frac{\partial\Phi(\mathbf{x} |\lambda,\mu,\sigma)}{\partial\mu}=\frac{\partial}{\partial\mu} \left(1 + \text{erf}\left(\lambda\frac{\mathbf{x}-\mu}{\sigma\sqrt{2}}\right)\right)
+\end{align}
+
+\begin{align}
+\frac{\partial\Phi(\mathbf{x}|\lambda,\mu,\sigma)}{\partial\mu}=\frac{\partial}{\partial\mu}\left(1 + \frac{2}{\sqrt{\pi}}\int_{0}^{\lambda\frac{\mathbf{x}-\mu}{\sigma\sqrt{2}}}\exp\left(-t^2\right)dt\right)
+\end{align}
+
+\begin{align}
+\frac{\partial\Phi(\mathbf{x}|\lambda,\mu,\sigma)}{\partial\mu}= \frac{2}{\sqrt{\pi}}\exp\left(-\lambda^2\frac{(\mathbf{x}-\mu)^2}{2\sigma^2}\right)\left(-\frac{\lambda}{\sigma\sqrt{2}}\right)
+\end{align}
+
+\begin{align}
+\frac{\partial\Phi(\mathbf{x}|\lambda,\mu,\sigma)}{\partial\mu}=-\frac{2}{\sqrt{2\pi}}\frac{\lambda}{\sigma}\exp\left(-\lambda^2\frac{(\mathbf{x}-\mu)^2}{2\sigma^2}\right)
+\end{align}
+which can be simplified with $\sqrt{\frac{2}{\pi}}=\frac{2}{\sqrt{2\pi}}$. Differentiating the oscillating term w.r.t. $\mu$ writes
+\begin{align}
+\frac{\partial A(\mathbf{x}|\mu,f,\phi)}{\partial \mu} = \frac{\partial}{\partial\mu} \cos\left(2 \pi f \left(\mathbf{x} - \mu\right) + \phi\right)
+\end{align}
+so that
+\begin{align}
+\frac{\partial A(\mathbf{x}|\mu,f,\phi)}{\partial \mu} = 2\pi f \sin\left(2\pi f(\mathbf{x}-\mu)+\phi\right)
+\end{align}
+%
+\subsection{Partial derivative w.r.t. $\sigma$}
+% d/ds (y - a exp(-(x-u)²/(2s²))*(1+erf(l*(x-u)/(s*sqrt(2)))))²
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \sigma} = \frac{\partial}{\partial \sigma}\left(\alpha\,\mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi)\right)
+\end{align}
+which becomes
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \sigma} = \alpha&\left(\Phi(\mathbf{x}|\lambda,\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi) \frac{\partial \mathcal{N}(\mathbf{x}|\mu,\sigma)}{\partial \sigma} \right. \\ 
+&+ \mathcal{N}(\mathbf{x}|\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi) \frac{\partial \Phi(\mathbf{x}|\lambda,\mu,\sigma)}{\partial \sigma} \\
+&+ \left. \mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma) \frac{\partial A(\mathbf{x}|\mu,f,\phi)}{\partial \sigma} \right)
+\end{align}
+after applying the product rule.
+\begin{align}
+\frac{\partial \mathcal{N}(\mathbf{x}|\mu,\sigma)}{\partial \sigma} = \frac{(\mathbf{x}-\mu)^2}{\sigma^3} \exp\left(-\frac{(\mathbf{x}-\mu)^2}{2\sigma^2}\right)
+\end{align}
+\begin{align}
+\frac{\partial\Phi(\mathbf{x}|\lambda,\mu,\sigma)}{\partial\sigma}=-\frac{2}{\sqrt{2\pi}}\frac{\lambda(\mathbf{x}-\mu)}{\sigma^2}\exp\left(-\lambda^2\frac{(\mathbf{x}-\mu)^2}{2\sigma^2}\right)
+\end{align}
+which can be simplified with $\sqrt{\frac{2}{\pi}}=\frac{2}{\sqrt{2\pi}}$. Differentiating the oscillating term w.r.t. $\sigma$ writes
+\begin{align}
+\frac{\partial A(\mathbf{x}|\mu,f,\phi)}{\partial \sigma} = \frac{\partial}{\partial\sigma} \cos\left(2 \pi f \left(\mathbf{x} - \mu\right) + \phi\right)
+\end{align}
+so that
+\begin{align}
+\frac{\partial A(\mathbf{x}|\mu,f,\phi)}{\partial \sigma} = 0
+\end{align}
+%
+\subsection{Partial derivative w.r.t. $\lambda$}
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \lambda} = \frac{\partial}{\partial \lambda}\left(\alpha\,\mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi)\right)
+\end{align}
+which becomes
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \lambda} = \alpha\,\mathcal{N}(\mathbf{x}|\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi) \frac{\partial \Phi(\mathbf{x}|\lambda,\mu,\sigma)}{\partial \lambda}
+\end{align}
+
+\begin{align}
+\frac{\partial\Phi(\mathbf{x}|\lambda,\mu,\sigma)}{\partial\lambda}=\frac{2}{\sqrt{2\pi}}\frac{\mathbf{x}-\mu}{\sigma}\exp\left(-\lambda^2\frac{(\mathbf{x}-\mu)^2}{2\sigma^2}\right)
+\end{align}
+which can be simplified with $\sqrt{\frac{2}{\pi}}=\frac{2}{\sqrt{2\pi}}$.
+
+\subsection{Partial derivative w.r.t. $\alpha$}
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \alpha} = \frac{\partial}{\partial \alpha}\alpha\left(\mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma)  \, A(\mathbf{x}|\mu,f,\phi)\right)
+\end{align}
+which becomes
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \alpha} = \mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi)
+\end{align}
+
+\subsection{Partial derivative w.r.t. $f$}
+
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial f} = \frac{\partial}{\partial f}\alpha\left(\mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma)  \, A(\mathbf{x}|\mu,f,\phi)\right)
+\end{align}
+which becomes
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial f} = \alpha&\left(\Phi(\mathbf{x}|\lambda,\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi) \frac{\partial \mathcal{N}(\mathbf{x}|\mu,\sigma)}{\partial f} \right. \\ 
+&+ \mathcal{N}(\mathbf{x}|\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi) \frac{\partial \Phi(\mathbf{x}|\lambda,\mu,\sigma)}{\partial f} \\
+&+ \left. \mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma) \frac{\partial A(\mathbf{x}|\mu,f,\phi)}{\partial f} \right)
+\end{align}
+Differentiating the oscillating term w.r.t. $f$ writes
+\begin{align}
+\frac{\partial A(\mathbf{x}|\mu,f,\phi)}{\partial \sigma} = \frac{\partial}{\partial\sigma} \cos\left(2 \pi f \left(\mathbf{x} - \mu\right) + \phi\right)
+\end{align}
+so that
+\begin{align}
+\frac{\partial A(\mathbf{x}|\mu,f,\phi)}{\partial f} = 2 \pi \left(\mu-\mathbf{x}\right) \sin(2\pi f (\mathbf{x}-\mu)+\phi)
+\end{align}
+%
+\subsection{Partial derivative w.r.t. $\phi$}
+
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \phi} = \frac{\partial}{\partial \phi}\alpha\left(\mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma)  \, A(\mathbf{x}|\mu,f,\phi)\right)
+\end{align}
+which becomes
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \phi} = \alpha&\left(\Phi(\mathbf{x}|\lambda,\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi) \frac{\partial \mathcal{N}(\mathbf{x}|\mu,\sigma)}{\partial \phi} \right. \\ 
+&+ \mathcal{N}(\mathbf{x}|\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi) \frac{\partial \Phi(\mathbf{x}|\lambda,\mu,\sigma)}{\partial \phi} \\
+&+ \left. \mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma) \frac{\partial A(\mathbf{x}|\mu,f,\phi)}{\partial \phi} \right)
+\end{align}
+Differentiating the oscillating term w.r.t. $\phi$ writes
+\begin{align}
+\frac{\partial A(\mathbf{x}|\mu,f,\phi)}{\partial \phi} = \frac{\partial}{\partial\phi} \cos\left(2 \pi f \left(\mathbf{x} - \mu\right) + \phi\right)
+\end{align}
+so that
+\begin{align}
+\frac{\partial A(\mathbf{x}|\mu,f,\phi)}{\partial \phi} = -\sin(2\pi f (\mathbf{x}-\mu)+\phi)
+\end{align}
+%
+
+\section{Jacobian Matrix}
+The Jacobian matrix $\mathbf{J}\in\mathbb{R}^{N \times P}$ with $N$ samples and $P$ variables writes
+\begin{align}
+\mathbf{J} = \gamma
+\begin{bmatrix}
+\frac{\partial m\left(\mathbf{p}_k,x_0\right)}{\partial \alpha} &
+\frac{\partial m\left(\mathbf{p}_k,x_0\right)}{\partial \mu} &
+\frac{\partial m\left(\mathbf{p}_k,x_0\right)}{\partial \sigma} &
+\frac{\partial m\left(\mathbf{p}_k,x_0\right)}{\partial \lambda} &
+\frac{\partial m\left(\mathbf{p}_k,x_0\right)}{\partial f} &
+\frac{\partial m\left(\mathbf{p}_k,x_0\right)}{\partial \phi} \\
+\frac{\partial m\left(\mathbf{p}_k,x_1\right)}{\partial \alpha} &
+\frac{\partial m\left(\mathbf{p}_k,x_1\right)}{\partial \mu} &
+\frac{\partial m\left(\mathbf{p}_k,x_1\right)}{\partial \sigma} &
+\frac{\partial m\left(\mathbf{p}_k,x_1\right)}{\partial \lambda} &
+\frac{\partial m\left(\mathbf{p}_k,x_1\right)}{\partial f} &
+\frac{\partial m\left(\mathbf{p}_k,x_1\right)}{\partial \phi} \\
+\vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+\frac{\partial m\left(\mathbf{p}_k,\mathbf{x}\right)}{\partial \alpha} &
+\frac{\partial m\left(\mathbf{p}_k,\mathbf{x}\right)}{\partial \mu} &
+\frac{\partial m\left(\mathbf{p}_k,\mathbf{x}\right)}{\partial \sigma} &
+\frac{\partial m\left(\mathbf{p}_k,\mathbf{x}\right)}{\partial \lambda} &
+\frac{\partial m\left(\mathbf{p}_k,\mathbf{x}\right)}{\partial f} &
+\frac{\partial m\left(\mathbf{p}_k,\mathbf{x}\right)}{\partial \phi} \\
+\end{bmatrix}
+\end{align}
+where the term $\gamma=-2\left(y-M\left(\mathbf{P};\mathbf{x}\right)\right)$ comes from the chain rule in Eq.~(\ref{eq:chain_rule}). The Jacobian is used to update parameter estimates. This can be done in a Gauss-Newton update fashion as given by
+\begin{align}
+\mathbf{p}_{k+1} = \mathbf{p}_k - \alpha \left(\mathbf{J}^\intercal\mathbf{J}\right)^{-1}\mathbf{J}^\intercal\mathbf{x}
+\end{align}
+
+\section{Combined partial derivatives}
+
+\begin{align}
+\frac{\partial L\left(\mathbf{P}\right)}{\partial \mathbf{P}}=2\left(M\left(\mathbf{P};\mathbf{x}\right)-y\right)\frac{\partial m\left(\mathbf{p}_k,\mathbf{x}\right)}{\partial \mathbf{P}}
+\label{eq:partial_mu}
+\end{align}
+
+\subsection{Partial derivative w.r.t. $\mu$}
+% Wolfram: a((x-u)/s^2 (1 + Erf[(l (x-u))/(Sqrt[2] s)])/(E^((x-u)^2/(2 s^2))) -(E^(-(x-u)^2/(2 s^2)(1+l^2)) l Sqrt[2/Pi])/s)
+%\begin{align}
+%\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \mu} = \alpha\left(\frac{\mathbf{x}-\mu}{\sigma^2} \mathcal{N}(\mathbf{x}|\mu,\sigma)\Phi(\mathbf{x}|\lambda,\mu,\sigma) - \frac{\lambda\sqrt{\frac{2}{\pi}}}{\sigma}\exp\left(-\lambda^2\frac{(\mathbf{x}-\mu)^2}{2\sigma^2}\right) \mathcal{N}(\mathbf{x}|\mu,\sigma)\right)
+%\end{align}
+
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \mu} = \alpha \, 
+&\Bigg(\frac{\mathbf{x}-\mu}{\sigma^2} \, \mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi) \Bigg. \\
+&-\frac{\exp\left(-\lambda^2\frac{(\mathbf{x}-\mu)^2}{2\sigma^2}\right)}{\sigma\sqrt{2\pi}} \, \mathcal{N}(\mathbf{x}|\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi) \\
+&+\Bigg. 2\pi f \sin(2\pi f(\mathbf{x}-\mu)+\phi) \, \mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma)
+\Bigg)
+\end{align}
+
+\subsection{Partial derivative w.r.t. $\sigma$}
+
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \sigma} =
+\alpha \, \mathcal{N}(\mathbf{x}|\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi) \, \left(
+\frac{(\mathbf{x}-\mu)^2}{\sigma^3} \Phi(\mathbf{x}|\lambda,\mu,\sigma)
+-\sqrt{\frac{2}{\pi}}\frac{\lambda(\mathbf{x}-\mu)}{\sigma^2}\exp\left(-\lambda^2\frac{(\mathbf{x}-\mu)^2}{2\sigma^2}\right)
+\right)
+\end{align}
+
+\subsection{Partial derivative w.r.t. $\lambda$}
+
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \lambda} =
+-\alpha\,\mathcal{N}(\mathbf{x}|\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi) \, \sqrt{\frac{2}{\pi}}\frac{\mathbf{x}-\mu}{\sigma}\exp\left(-\lambda^2\frac{(\mathbf{x}-\mu)^2}{2\sigma^2}
+\right)
+\end{align}
+
+\subsection{Partial derivative w.r.t. $\alpha$}
+
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \alpha} = \mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma) \, A(\mathbf{x}|\mu,f,\phi)´
+\end{align}
+
+\subsection{Partial derivative w.r.t. $f$}
+
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial f} = \alpha \, \mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma) \, 2 \pi \left(\mu-\mathbf{x}\right) \sin(2\pi f (\mathbf{x}-\mu)+\phi)
+\end{align}
+
+\subsection{Partial derivative w.r.t. $\phi$}
+
+\begin{align}
+\frac{\partial m\left(\mathbf{p},\mathbf{x}\right)}{\partial \phi} = -\alpha \, \mathcal{N}(\mathbf{x}|\mu,\sigma) \, \Phi(\mathbf{x}|\lambda,\mu,\sigma) \, \sin(2\pi f (\mathbf{x}-\mu)+\phi)
+\end{align}
+
+\end{document}
