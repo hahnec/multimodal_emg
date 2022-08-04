@@ -20,9 +20,6 @@ def multimodal_fit(
         jac_fun: Union[Callable, str] = None,
         loss_fun: Callable = None,
     ):
-    """
-    
-    """
 
     lib = get_lib(data)
 
@@ -44,9 +41,6 @@ def multimodal_fit(
     if fun == gaussian_wave_model: assert comp_num == 5, 'Gaussian wave regression requires 5 parameters per component'
     if fun == emg_wave_model: assert comp_num in (2, 6), 'Wave-EMG regression requires 2 or 6 parameters per component'
 
-    # determine function lib
-    exp_fun, erf_fun = (torch.exp, torch.erf) if str(type(data)).__contains__('torch') else (numpy.exp, erf)
-
     # pass args to functions
     model = lambda alpha, mu, sigma, eta=None, f_c=None, phi=None: fun(alpha, mu, sigma, eta, f_c, phi, x=x)
     components_model_with_args = lambda p: multimodal_model(p, model, components)
@@ -54,7 +48,7 @@ def multimodal_fit(
 
     # pass args to jacobian function
     if isinstance(jac_fun, Callable):
-        emg_jac_with_args = lambda p: jac_fun(*p, x=x, exp_fun=exp_fun, erf_fun=erf_fun)
+        emg_jac_with_args = lambda p: jac_fun(*p, x=x)
         jac_fun_with_args = lambda p: components_jac(p, components_model_with_args, data, components, emg_jac_with_args)
     else:
         jac_fun_with_args = '2-point'
@@ -70,13 +64,13 @@ def multimodal_fit(
 def multimodal_model(
         p: Union[list, tuple, numpy.ndarray, torch.Tensor],
         model: Callable,
-        mixtures: int = 1,
+        components: int = 1,
             ):
 
-    n = len(p) // mixtures
+    n = len(p) // components
     d = model(*p[:n])
 
-    for i in range(1, mixtures):
+    for i in range(1, components):
 
         # phase in (-pi, pi] constraint by wrapping values into co-domain
         if n > 4 and not(-PI < p[i*n-1] < PI): 

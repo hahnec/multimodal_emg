@@ -63,13 +63,13 @@ class MultimodalTester(unittest.TestCase):
             )
 
             # results
-            self.multimodal_plot(fitted_data=result, title='Envelope mixture plot') if self.plot_opt else None
+            self.multimodal_plot(fitted_data=result, title='MM-EMG plot') if self.plot_opt else None
             squared_error = numpy.sum((self.data_arr - result)**2) / len(result)
-            print('Envelope mixture model squared error amounts to  %s' % round(squared_error, 4))
+            print('Multi-modal EMG squared error amounts to  %s' % round(squared_error, 4))
 
             # error assertion of mixture model
             self.assertTrue(len(p_star) == len(self.features), msg='Number of input and output parameters varies')
-            self.assertTrue(squared_error < 0.039, msg='Channel data and mixture model curve deviate')
+            self.assertTrue(squared_error < 0.039, msg='Channel data and MM-EMG curve deviate')
 
     def test_synth_multimodal_torch(self):
 
@@ -92,13 +92,13 @@ class MultimodalTester(unittest.TestCase):
             result = result.cpu().numpy()
 
             # results
-            self.multimodal_plot(fitted_data=result, title='Envelope mixture plot') if self.plot_opt else None
+            self.multimodal_plot(fitted_data=result, title='MM-EMG plot') if self.plot_opt else None
             squared_error = numpy.sum((self.data_arr - result)**2) / len(result)
-            print('Envelope mixture model squared error amounts to  %s' % round(squared_error, 4))
+            print('Multi-modal EMG squared error amounts to  %s' % round(squared_error, 4))
 
             # error assertion of mixture model
             self.assertTrue(len(p_star) == len(features), msg='Number of input and output parameters varies')
-            self.assertTrue(squared_error < 0.039, msg='Channel data and mixture model curve deviate')
+            self.assertTrue(squared_error < 0.039, msg='Channel data and MM-EMG curve deviate')
 
     def test_synth_multimodal_feature_types(self):
         
@@ -118,13 +118,13 @@ class MultimodalTester(unittest.TestCase):
             )
 
             # results
-            self.multimodal_plot(fitted_data=result, title='Envelope mixture plot') if self.plot_opt else None
+            self.multimodal_plot(fitted_data=result, title='MM-EMG plot') if self.plot_opt else None
             squared_error = numpy.sum((self.data_arr - result)**2) / len(result)
-            print('Envelope mixture model squared error amounts to  %s' % round(squared_error, 4))
+            print('Multi-modal EMG squared error amounts to  %s' % round(squared_error, 4))
 
             # error assertion of mixture model
             self.assertTrue(len(p_star) == len(self.features), msg='Number of input and output parameters varies')
-            self.assertTrue(squared_error < 0.039, msg='Channel data and mixture model curve deviate')
+            self.assertTrue(squared_error < 0.039, msg='Channel data and MM-EMG curve deviate')
 
 
     def multimodal_plot(self, fitted_data=None, title=None):

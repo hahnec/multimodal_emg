@@ -1,4 +1,6 @@
 import numpy as np
+from scipy.special import erf
+from typing import Callable
 
 from multimodal_emg.models.basic_terms import gauss_term, asymm_term, oscil_term
 
@@ -9,7 +11,10 @@ def gaussian_wave_model(
         sigma: float = 1e-5,
         eta: float = 0,      
         fkhz: int = 1e-1,
-        phi: int = 0, 
+        phi: int = 0,
+        exp_fun: Callable = np.exp,
+        erf_fun: Callable = erf,
+        cos_fun: Callable = np.cos,
         x: np.ndarray = np.linspace(-1e3, 1e3, int(2e3)),
             ):
     """
@@ -26,8 +31,8 @@ def gaussian_wave_model(
     """
 
     alpha = 1 if alpha is None else alpha
-    gauss = gauss_term(x, mu, sigma)
-    oscil = oscil_term(x, mu, fkhz*1e3, phi)
+    gauss = gauss_term(x, mu, sigma, exp_fun)
+    oscil = oscil_term(x, mu, fkhz*1e3, phi, cos_fun)
 
     return alpha * gauss * oscil
 
@@ -39,6 +44,9 @@ def emg_wave_model(
         eta: float = 0,
         fkhz: int = 1e-1,
         phi: int = 0,
+        exp_fun: Callable = np.exp,
+        erf_fun: Callable = erf,
+        cos_fun: Callable = np.cos,
         x=np.linspace(-1e3, 1e3, int(2e3)),
             ):
     """
@@ -55,8 +63,8 @@ def emg_wave_model(
     """
 
     alpha = 1 if alpha is None else alpha
-    gauss = gauss_term(x, mu, sigma)
-    oscil = oscil_term(x, mu, fkhz*1e3, phi)
-    asymm = asymm_term(x, mu, sigma, eta)
+    gauss = gauss_term(x, mu, sigma, exp_fun)
+    oscil = oscil_term(x, mu, fkhz*1e3, phi, cos_fun)
+    asymm = asymm_term(x, mu, sigma, eta, erf_fun)
 
     return alpha * gauss * oscil * asymm

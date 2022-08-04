@@ -1,9 +1,13 @@
 from tests.test_multimodal_dtype import MultimodalTester
 from tests.test_multimodal_emg import EchoMultiModalTester
+from tests.test_batch_multimodal_emg import BatchEchoMultiModalTester
+from tests.test_picmus_data import TestPicmusData
 
 test_classes = [
     MultimodalTester,
     EchoMultiModalTester,
+    BatchEchoMultiModalTester,
+    TestPicmusData,
                 ]
 
 for test_class in test_classes:

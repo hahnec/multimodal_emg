@@ -86,64 +86,70 @@ def pd_oemg_wrt_alpha(x, mu, sigma, eta, f_c, phi, exp_fun=np.exp, erf_fun=erf, 
 
     return gauss_term(x, mu, sigma, exp_fun) * asymm_term(x, mu, sigma, eta, erf_fun) * oscil_term(x, mu, f_c, phi, cos_fun)
 
-def gaussian_jac(alpha=None, mu=None, sigma=None, x=None, exp_fun=np.exp, erf_fun=erf):
+def gaussian_jac(alpha=None, mu=None, sigma=None, x=None):
 
     lib = get_lib(x)
 
-    jacobian = -1 * lib.vstack([
-        gauss_term(x, mu, sigma),
-        alpha*pd_gauss_wrt_mu(x, mu, sigma),
-        alpha*pd_gauss_wrt_sigma(x, mu, sigma),
+    jacobian = -1 * lib.stack([
+        gauss_term(x, mu, sigma, lib.exp),
+        alpha*pd_gauss_wrt_mu(x, mu, sigma, lib.exp),
+        alpha*pd_gauss_wrt_sigma(x, mu, sigma, lib.exp),
     ])
 
-    return jacobian.T
+    return jacobian
 
-def emg_jac(alpha=None, mu=None, sigma=None, eta=None, x=None, exp_fun=np.exp, erf_fun=erf):
+def emg_jac(alpha=None, mu=None, sigma=None, eta=None, x=None):
 
     lib = get_lib(x)
 
-    jacobian = -1 * lib.vstack([
-        pd_emg_wrt_alpha(x, mu, sigma, eta, exp_fun, erf_fun),
-        alpha*pd_emg_wrt_mu(x, mu, sigma, eta, exp_fun, erf_fun),
-        alpha*pd_emg_wrt_sigma(x, mu, sigma, eta, exp_fun, erf_fun),
-        alpha*pd_emg_wrt_eta(x, mu, sigma, eta, exp_fun),
+    erf_fun = torch.erf if lib.__name__ == 'torch' else erf
+
+    jacobian = -1 * lib.stack([
+        pd_emg_wrt_alpha(x, mu, sigma, eta, lib.exp, erf_fun),
+        alpha*pd_emg_wrt_mu(x, mu, sigma, eta, lib.exp, erf_fun),
+        alpha*pd_emg_wrt_sigma(x, mu, sigma, eta, lib.exp, erf_fun),
+        alpha*pd_emg_wrt_eta(x, mu, sigma, eta, lib.exp),
     ])
 
-    return jacobian.T
+    return jacobian
 
-def oemg_jac(alpha=None, mu=None, sigma=None, eta=None, fkhz=None, phi=None, x=None, exp_fun=np.exp, erf_fun=erf):
+def oemg_jac(alpha=None, mu=None, sigma=None, eta=None, fkhz=None, phi=None, x=None):
 
     f_c = fkhz * 1e3
 
     lib = get_lib(x)
 
-    jacobian = -1 * lib.vstack([
-        pd_oemg_wrt_alpha(x, mu, sigma, eta, f_c, phi, exp_fun=exp_fun, erf_fun=erf_fun, cos_fun=lib.cos),
-        alpha*pd_oemg_wrt_mu(x, mu, sigma, eta, f_c, phi, exp_fun=exp_fun, erf_fun=erf_fun, cos_fun=lib.cos, sin_fun=lib.sin),
-        alpha*pd_oemg_wrt_sigma(x, mu, sigma, eta, f_c, phi, exp_fun=exp_fun, erf_fun=erf_fun, cos_fun=lib.cos),
-        alpha*pd_oemg_wrt_eta(x, mu, sigma, eta, f_c, phi, exp_fun=exp_fun, cos_fun=lib.cos),
-        alpha*pd_oemg_wrt_f_c(x, mu, sigma, eta, f_c, phi, exp_fun=exp_fun, erf_fun=erf_fun, sin_fun=lib.sin),
-        alpha*pd_oemg_wrt_phi(x, mu, sigma, eta, f_c, phi, exp_fun=exp_fun, erf_fun=erf_fun, sin_fun=lib.sin),
+    erf_fun = torch.erf if lib.__name__ == 'torch' else erf
+
+    jacobian = -1 * lib.stack([
+        pd_oemg_wrt_alpha(x, mu, sigma, eta, f_c, phi, exp_fun=lib.exp, erf_fun=erf_fun, cos_fun=lib.cos),
+        alpha*pd_oemg_wrt_mu(x, mu, sigma, eta, f_c, phi, exp_fun=lib.exp, erf_fun=erf_fun, cos_fun=lib.cos, sin_fun=lib.sin),
+        alpha*pd_oemg_wrt_sigma(x, mu, sigma, eta, f_c, phi, exp_fun=lib.exp, erf_fun=erf_fun, cos_fun=lib.cos),
+        alpha*pd_oemg_wrt_eta(x, mu, sigma, eta, f_c, phi, exp_fun=lib.exp, cos_fun=lib.cos),
+        alpha*pd_oemg_wrt_f_c(x, mu, sigma, eta, f_c, phi, exp_fun=lib.exp, erf_fun=erf_fun, sin_fun=lib.sin),
+        alpha*pd_oemg_wrt_phi(x, mu, sigma, eta, f_c, phi, exp_fun=lib.exp, erf_fun=erf_fun, sin_fun=lib.sin),
     ])
 
-    return jacobian.T
+    return jacobian
 
-def wav_jac(alpha=None, mu=None, sigma=None, eta=None, fkhz=None, phi=None, x=None, exp_fun=np.exp, erf_fun=erf):
+def wav_jac(alpha=None, mu=None, sigma=None, eta=None, fkhz=None, phi=None, x=None):
 
     f_c = fkhz * 1e3
 
     lib = get_lib(x)
 
-    jacobian = -1 * lib.vstack([
-        lib.zeros(len(x)),
-        lib.zeros(len(x)),
-        lib.zeros(len(x)),
-        lib.zeros(len(x)),
-        alpha*pd_oemg_wrt_f_c(x, mu, sigma, eta, f_c, phi, exp_fun=exp_fun, erf_fun=erf_fun, sin_fun=lib.sin),
-        alpha*pd_oemg_wrt_phi(x, mu, sigma, eta, f_c, phi, exp_fun=exp_fun, erf_fun=erf_fun, sin_fun=lib.sin),
+    erf_fun = torch.erf if lib.__name__ == 'torch' else erf
+
+    jacobian = -1 * lib.stack([
+        lib.zeros_like(x),
+        lib.zeros_like(x),
+        lib.zeros_like(x),
+        lib.zeros_like(x),
+        alpha*pd_oemg_wrt_f_c(x, mu, sigma, eta, f_c, phi, exp_fun=lib.exp, erf_fun=erf_fun, sin_fun=lib.sin),
+        alpha*pd_oemg_wrt_phi(x, mu, sigma, eta, f_c, phi, exp_fun=lib.exp, erf_fun=erf_fun, sin_fun=lib.sin),
     ])
 
-    return jacobian.T
+    return jacobian
 
 def components_jac(
         p, 
@@ -155,12 +161,40 @@ def components_jac(
 
     lib = get_lib(data)
 
-    n = len(p) // components
+    feats_num = len(p) // components
     c = 2*(data-model(p))[..., None]   # chain rule term
 
     d = []
     for i in range(components):
-        jac = jac_component_with_args(p[i*n:(i+1)*n])
-        d.append(c*jac)
+        jac = jac_component_with_args(p[i*feats_num:(i+1)*feats_num])
+        d.append(c*jac.T)
 
     return lib.hstack(d)
+
+def batch_components_jac(
+        p, 
+        model: Callable, 
+        data: torch.Tensor, 
+        components: int,
+        jac_component_with_args: Callable,
+    ):
+
+    c = 2*(data.unsqueeze(1)-model(p))[..., None]   # chain rule term
+
+    feats_num = p.shape[-1] // components
+    feats = p.view(-1, components, feats_num)    # reshape to batch x components x features 
+    if feats_num > 4:
+        # phase in (-pi, pi] constraint by wrapping values into co-domain
+        feats[..., 5][feats[..., 5] < -PI] += 2*PI
+        feats[..., 5][feats[..., 5] > +PI] -= 2*PI
+    feats = feats.view(-1, feats_num).T.unsqueeze(-1)    # features x batch*components
+
+    jac = jac_component_with_args(feats)
+    #jac = torch.swapaxes(jac.view(data.shape[-1], -1, components, feats_num), 0, 1).flatten(start_dim=2)   # with transpose
+    #jac = torch.swapaxes(jac.reshape(data.shape[-1], -1, components*feats_num), 0, 1)  # with transpose
+    #jac = torch.swapaxes(torch.swapaxes(jac.reshape(components*feats_num, -1, data.shape[-1]), 0, 1), 1, 2)  # without transpose
+    jac = jac.swapaxes(0, 2).reshape(data.shape[-1], -1, components*feats_num).swapaxes(0, 1)
+    jac = torch.nan_to_num(jac, nan=0)
+    d = c * jac.unsqueeze(1)
+
+    return d

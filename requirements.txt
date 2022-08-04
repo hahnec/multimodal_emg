@@ -11,3 +11,5 @@ scipy==1.7.3
 six==1.16.0
 torch==1.12.0
 typing_extensions==4.3.0
+torchimize
+pyuff
