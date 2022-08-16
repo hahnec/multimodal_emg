@@ -24,6 +24,7 @@ def multimodal_fit(
     lib = get_lib(data)
 
     # prepare variables
+    if isinstance(features, (list, tuple)): features = torch.Tensor(features) if lib.__str__().__contains__('torch') else numpy.array(features)
     p = lib.reshape(features, (-1,))
     x = lib.arange(len(data)) if x is None else x
     x = x.cpu() if isinstance(x, torch.Tensor) else x
