@@ -81,7 +81,7 @@ def multimodal_model(
         if p[(i-1)*n] < 0: p[(i-1)*n] = abs(p[(i-1)*n])
 
         # sigma positive constraint
-        if p[(i-1)*n+2] <= 0: p[(i-1)*n+2] = 1e-2
+        if p[(i-1)*n+2] <= 0: p[(i-1)*n+2] = abs(p[(i-1)*n+2])
 
         d += model(*p[i*n:(i+1)*n])
 
