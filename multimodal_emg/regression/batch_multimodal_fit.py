@@ -112,10 +112,10 @@ def batch_multimodal_model(
         feats[..., 5][feats[..., 5] > +PI] -= 2*PI
 
     # alpha positive constraint
-    feats[..., 0][feats[..., 0] < 0] = 0
+    feats[..., 0][feats[..., 0] < 0] = abs(feats[..., 0][feats[..., 0] < 0])
 
     # sigma positive constraint
-    feats[..., 2][feats[..., 2] <= 0] = 1e-3
+    feats[..., 2][feats[..., 2] <= 0] = 1e-2
     
     feats = feats.view(-1, feats_num).T.unsqueeze(-1)    # features x batch*components
 
