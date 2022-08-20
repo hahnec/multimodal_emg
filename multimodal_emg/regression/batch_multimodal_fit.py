@@ -114,8 +114,11 @@ def batch_multimodal_model(
     # alpha positive constraint
     feats[..., 0][feats[..., 0] < 0] = abs(feats[..., 0][feats[..., 0] < 0])
 
+    # mu positive constraint, tbd: out-of-frame and overlap constraint
+    feats[..., 1][feats[..., 1] < 0] = abs(feats[..., 1][feats[..., 1] < 0])
+
     # sigma positive constraint
-    feats[..., 2][feats[..., 2] <= 0] = 1e-2
+    feats[..., 2][feats[..., 2] <= 0] = abs(feats[..., 2][feats[..., 2] <= 0])
     
     feats = feats.view(-1, feats_num).T.unsqueeze(-1)    # features x batch*components
 

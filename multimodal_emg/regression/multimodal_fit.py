@@ -80,6 +80,9 @@ def multimodal_model(
         # alpha positive constraint
         if p[(i-1)*n] < 0: p[(i-1)*n] = abs(p[(i-1)*n])
 
+        # mu positive constraint, tbd: out-of-frame and overlap constraint
+        if p[(i-1)*n+1] < 0: p[(i-1)*n+1] = abs(p[(i-1)*n+1])
+
         # sigma positive constraint
         if p[(i-1)*n+2] <= 0: p[(i-1)*n+2] = abs(p[(i-1)*n+2])
 
