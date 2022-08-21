@@ -106,19 +106,14 @@ def batch_multimodal_model(
 
     feats_num = p.shape[-1] // components
     feats = p.view(-1, components, feats_num)    # view to batch x components x features 
+
+    # alpha, mu and sigma positive constraints
+    feats[..., :3] = abs(feats[..., :3])
+
+    # phase in (-pi, pi] constraint by wrapping values into co-domain
     if feats_num > 4:
-        # phase in (-pi, pi] constraint by wrapping values into co-domain
         feats[..., 5][feats[..., 5] < -PI] += 2*PI
         feats[..., 5][feats[..., 5] > +PI] -= 2*PI
-
-    # alpha positive constraint
-    feats[..., 0][feats[..., 0] < 0] = abs(feats[..., 0][feats[..., 0] < 0])
-
-    # mu positive constraint, tbd: out-of-frame and overlap constraint
-    feats[..., 1][feats[..., 1] < 0] = abs(feats[..., 1][feats[..., 1] < 0])
-
-    # sigma positive constraint
-    feats[..., 2][feats[..., 2] <= 0] = abs(feats[..., 2][feats[..., 2] <= 0])
     
     feats = feats.view(-1, feats_num).T.unsqueeze(-1)    # features x batch*components
 
