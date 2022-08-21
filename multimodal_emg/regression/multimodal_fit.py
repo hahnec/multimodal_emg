@@ -25,18 +25,18 @@ def multimodal_fit(
 
     # prepare variables
     if isinstance(features, (list, tuple)): features = torch.Tensor(features) if lib.__str__().__contains__('torch') else numpy.array(features)
-    p = lib.reshape(features, (-1,))
+    p_init = lib.reshape(features, (-1,))
     x = lib.arange(len(data)) if x is None else x
     x = x.cpu() if isinstance(x, torch.Tensor) else x
     data = data.cpu() if isinstance(data, torch.Tensor) else data
-    p = p.cpu() if isinstance(p, torch.Tensor) else p
+    p_init = p_init.cpu() if isinstance(p_init, torch.Tensor) else p_init
     components = features.shape[0] if components is None and len(features.shape) == 2 else components
     fun = emg_envelope_model if fun is None else fun
     jac_fun = emg_jac if jac_fun is None else jac_fun
     loss_fun = l2_norm if loss_fun is None else loss_fun
 
     # component number assertion
-    comp_num = len(p) / components
+    comp_num = len(p_init) / components
     if fun == gaussian_envelope_model: assert comp_num == 3, 'Gaussian regression requires 3 parameters per component'
     if fun == emg_envelope_model: assert comp_num == 4, 'EMG regression requires 4 parameters per component'
     if fun == gaussian_wave_model: assert comp_num == 5, 'Gaussian wave regression requires 5 parameters per component'
@@ -44,7 +44,7 @@ def multimodal_fit(
 
     # pass args to functions
     model = lambda alpha, mu, sigma, eta=None, f_c=None, phi=None: fun(alpha, mu, sigma, eta, f_c, phi, x=x)
-    components_model_with_args = lambda p: multimodal_model(p, model, components)
+    components_model_with_args = lambda p: multimodal_model(p, model, components, sigma_threshold=5, mu_references=p_init[1::int(comp_num)])
     cost_fun = lambda p: loss_fun(data, components_model_with_args(p))
 
     # pass args to jacobian function
@@ -55,7 +55,7 @@ def multimodal_fit(
         jac_fun_with_args = '2-point'
 
     # optimization
-    p_star = least_squares(cost_fun, p, jac=jac_fun_with_args, max_nfev=max_iter).x
+    p_star = least_squares(cost_fun, p_init, jac=jac_fun_with_args, max_nfev=max_iter).x
 
     # infer result
     result = components_model_with_args(p_star)
@@ -63,15 +63,25 @@ def multimodal_fit(
     return p_star, result
 
 def multimodal_model(
-        p: Union[list, tuple, numpy.ndarray, torch.Tensor],
+        p: Union[numpy.ndarray, torch.Tensor],
         model: Callable,
         components: int = 1,
+        sigma_threshold: float = 5,
+        mu_references: Union[numpy.ndarray, torch.Tensor] = None,
             ):
 
     n = len(p) // components
     d = model(*p[:n])
 
     for i in range(1, components):
+
+        # mu constraint
+        if mu_references is not None:
+            if p[(i-1)*n+1] < mu_references[i-1]-sigma_threshold/2: p[(i-1)*n+1] = mu_references[i-1] - sigma_threshold/2
+            if p[(i-1)*n+1] > mu_references[i-1]+sigma_threshold/2: p[(i-1)*n+1] = mu_references[i-1] + sigma_threshold/2
+            
+        # upper sigma constraint
+        if p[(i-1)*n+2] > sigma_threshold: p[(i-1)*n+2] = sigma_threshold
 
         # alpha, mu, sigma positive constraints
         p[(i-1)*n:(i-1)*n+3] = abs(p[(i-1)*n:(i-1)*n+3])
