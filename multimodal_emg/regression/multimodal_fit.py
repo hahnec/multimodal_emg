@@ -42,9 +42,13 @@ def multimodal_fit(
     if fun == gaussian_wave_model: assert comp_num == 5, 'Gaussian wave regression requires 5 parameters per component'
     if fun == emg_wave_model: assert comp_num in (2, 6), 'Wave-EMG regression requires 2 or 6 parameters per component'
 
+    # constraint parameters
+    sigma_threshold = lib.nanmean(p_init[2::int(comp_num)]) * 5
+    mu_references = p_init[1::int(comp_num)]
+
     # pass args to functions
     model = lambda alpha, mu, sigma, eta=None, f_c=None, phi=None: fun(alpha, mu, sigma, eta, f_c, phi, x=x)
-    components_model_with_args = lambda p: multimodal_model(p, model, components, sigma_threshold=5, mu_references=p_init[1::int(comp_num)])
+    components_model_with_args = lambda p: multimodal_model(p, model, components, sigma_threshold=sigma_threshold, mu_references=mu_references)
     cost_fun = lambda p: loss_fun(data, components_model_with_args(p))
 
     # pass args to jacobian function

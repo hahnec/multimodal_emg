@@ -77,9 +77,13 @@ def batch_multimodal_fit(
     if fun == gaussian_wave_model: assert params_num == 5, 'Gaussian wave regression requires 5 parameters per component'
     if fun == emg_wave_model: assert params_num in (2, 6), 'Wave-EMG regression requires 2 or 6 parameters per component'
 
+    # constraint parameters
+    sigma_threshold = p_init[:, 2::int(params_num)].nanmean() * 5
+    mu_references = p_init[:, 1::int(params_num)]
+
     # pass args to functions
     model = lambda alpha, mu, sigma, eta=None, f_c=None, phi=None: fun(alpha, mu, sigma, eta, f_c, phi, exp_fun=torch.exp, erf_fun=torch.erf, cos_fun=torch.cos, x=x)
-    components_model_with_args = lambda p: batch_multimodal_model(p, model, components, batch_size, sigma_threshold=5, mu_references=p_init[:, 1::int(params_num)])
+    components_model_with_args = lambda p: batch_multimodal_model(p, model, components, batch_size, sigma_threshold=sigma_threshold, mu_references=mu_references)
     cost_fun = lambda p: loss_fun(data.unsqueeze(1), components_model_with_args(p))
 
     # pass args to jacobian function
