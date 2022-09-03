@@ -78,7 +78,7 @@ def batch_multimodal_fit(
     if fun == emg_wave_model: assert params_num in (2, 6), 'Wave-EMG regression requires 2 or 6 parameters per component'
 
     # constraint parameters
-    sigma_threshold = p_init[:, 2::int(params_num)].nanmean() * 5
+    sigma_threshold = p_init[:, 2::int(params_num)].nanmean() * 10
     mu_references = p_init[:, 1::int(params_num)]
 
     # pass args to functions
