@@ -43,7 +43,7 @@ The oscillation regression can be found in the accompanied [Jupyter Notebook](./
 ```
 @inproceedings{Hahne:2022,
     author = {Christopher Hahne},
-    title = {Acoustic Features from Univariate Multi-Modal Exponentially-Modified Gaussian Oscillators},
+    title = {Multimodal Exponentially Modified Gaussian Oscillators},
     booktitle= {2022 IEEE International Ultrasonics Symposium (IUS)},
     address={},
     month={Okt},
