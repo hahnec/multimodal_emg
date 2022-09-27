@@ -1,4 +1,4 @@
-# Multi-Modal Exponentially-Modified Gaussians
+# Multimodal Exponentially Modified Gaussians
 
 ## Quick Facts
 - multiple skewed Gaussian distributions for the univariate case
