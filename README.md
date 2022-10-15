@@ -36,9 +36,9 @@ plt.show()
 
 ## Oscillating Regression
 
-The oscillation regression can be found in the accompanied [Jupyter Notebook](./single_synth_mm_emg_example.ipynb) which yields the below result:
+The oscillation regression can be found in the accompanied [Jupyter Notebook](./single_synth_memg_example.ipynb) which yields the below result:
 
-[![Oscillating Multi-Modal EMG](./docs/figs/denoising_emg.svg)](./single_synth_mm_emg_example.ipynb)
+[![Oscillating Multi-Modal EMG](./docs/figs/denoising_emg.svg)](./single_synth_memg_example.ipynb)
 
 ## Citation
 
