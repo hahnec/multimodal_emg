@@ -23,7 +23,7 @@ class TestPicmusData(unittest.TestCase, BatchMultiModalPlot):
 
     def setUp(self):
         
-        self.plot_opt = True
+        self.plot_opt = False
 
         self.fname = './data/in_vivo/carotid_cross/carotid_cross_expe_dataset_rf.hdf5'
         f = h5py.File(self.fname, 'r')
@@ -34,8 +34,8 @@ class TestPicmusData(unittest.TestCase, BatchMultiModalPlot):
         self.fs = float(np.array(f['US']['US_DATASET0000']['sampling_frequency']))
         self.mod_freq = self.fs/5
 
-        self.upsample_factor = 4 # over-sampling helps with frequency and phase estimates
-        self.batch_size = 2
+        self.upsample_factor = 8 # over-sampling helps with frequency and phase estimates
+        self.batch_size = 4
         self.max_iter = 50
 
         self.t = np.arange(0, len(data_re[0, 0, ...])/self.fs, 1/self.fs/self.upsample_factor)
@@ -43,11 +43,6 @@ class TestPicmusData(unittest.TestCase, BatchMultiModalPlot):
         self.echo_list = []
         hilbert_list = []
         self.data_arr = np.zeros((data_re[0, ...].shape[0], len(data_re[0, 0, ...])*self.upsample_factor), dtype=data_re.dtype)
-
-        orth_img = np.sum(data_re[:, ...], 1)
-        plt.imshow(orth_img)
-        plt.show()
-    
         for i in range(self.batch_size):
             
             self.data_arr[i, ...] = np.interp(x=self.t, xp=np.arange(0, len(data_re[0, 0, ...])/self.fs, 1/self.fs), fp=data_re[0, i, ...]) if self.upsample_factor > 1 else data_re[0, i, ...]
