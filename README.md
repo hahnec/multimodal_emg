@@ -4,7 +4,7 @@
 
 ## Quick Facts
 - multiple asymmetric Gaussian distributions for the univariate case
-- optional oscillation term for wave approximation
+- optional oscillation term for wave approximations
 - based on [analytical derivation](./docs/exp_mod_gauss_wave_partial_derivative.pdf)
 - accepts ```numpy``` as well as ```torch``` data types
 
