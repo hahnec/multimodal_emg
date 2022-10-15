@@ -1,6 +1,6 @@
 # Multimodal Exponentially Modified Gaussians
 
-[![OneDrive](https://img.shields.io/badge/paper-arXiv:2209.12202-red)](https://arxiv.org/pdf/2209.12202.pdf)
+[![arXiv paper link](https://img.shields.io/badge/paper-arXiv:2209.12202-red)](https://arxiv.org/pdf/2209.12202.pdf)
 
 ## Quick Facts
 - multiple asymmetric Gaussian distributions for the univariate case
