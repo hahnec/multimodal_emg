@@ -43,12 +43,12 @@ def multimodal_fit(
     if fun == emg_wave_model: assert comp_num in (2, 6), 'Wave-EMG regression requires 2 or 6 parameters per component'
 
     # constraint parameters
-    sigma_threshold = lib.nanmean(p_init[2::int(comp_num)]) * 5
+    sigma_constraint = lib.nanmean(p_init[2::int(comp_num)]) * 10
     mu_references = p_init[1::int(comp_num)]
 
     # pass args to functions
     model = lambda alpha, mu, sigma, eta=None, f_c=None, phi=None: fun(alpha, mu, sigma, eta, f_c, phi, x=x)
-    components_model_with_args = lambda p: multimodal_model(p, model, components, sigma_threshold=sigma_threshold, mu_references=mu_references)
+    components_model_with_args = lambda p: multimodal_model(p, model, components, sigma_constraint=sigma_constraint, mu_references=mu_references)
     cost_fun = lambda p: loss_fun(data, components_model_with_args(p))
 
     # pass args to jacobian function
@@ -70,7 +70,7 @@ def multimodal_model(
         p: Union[numpy.ndarray, torch.Tensor],
         model: Callable,
         components: int = 1,
-        sigma_threshold: float = 5,
+        sigma_constraint: float = 5,
         mu_references: Union[numpy.ndarray, torch.Tensor] = None,
             ):
 
@@ -81,11 +81,11 @@ def multimodal_model(
 
         # mu constraint
         if mu_references is not None:
-            if p[(i-1)*n+1] < mu_references[i-1]-sigma_threshold/2: p[(i-1)*n+1] = mu_references[i-1] - sigma_threshold/2
-            if p[(i-1)*n+1] > mu_references[i-1]+sigma_threshold/2: p[(i-1)*n+1] = mu_references[i-1] + sigma_threshold/2
+            if p[(i-1)*n+1] < mu_references[i-1]-sigma_constraint/2: p[(i-1)*n+1] = mu_references[i-1] - sigma_constraint/2
+            if p[(i-1)*n+1] > mu_references[i-1]+sigma_constraint/2: p[(i-1)*n+1] = mu_references[i-1] + sigma_constraint/2
             
         # upper sigma constraint
-        if p[(i-1)*n+2] > sigma_threshold: p[(i-1)*n+2] = sigma_threshold
+        if p[(i-1)*n+2] > sigma_constraint: p[(i-1)*n+2] = sigma_constraint
 
         # alpha, mu, sigma positive constraints
         p[(i-1)*n:(i-1)*n+3] = abs(p[(i-1)*n:(i-1)*n+3])
