@@ -1,8 +1,10 @@
 # Multimodal Exponentially Modified Gaussians
 
+[![OneDrive](https://img.shields.io/badge/paper-arXiv:2209.12202-red)](https://arxiv.org/pdf/2209.12202.pdf)
+
 ## Quick Facts
-- multiple skewed Gaussian distributions for the univariate case
-- optional oscillation term for wave term estimation
+- multiple asymmetric Gaussian distributions for the univariate case
+- optional oscillation term for wave approximation
 - based on [analytical derivation](./docs/exp_mod_gauss_wave_partial_derivative.pdf)
 - accepts ```numpy``` as well as ```torch``` data types
 
@@ -36,7 +38,7 @@ plt.show()
 
 The oscillation regression can be found in the accompanied [Jupyter Notebook](./mm_emg_example.ipynb) which yields the below result:
 
-![Oscillating Multi-Modal EMG](./docs/figs/denoising_emg.svg)
+[![Oscillating Multi-Modal EMG](./docs/figs/denoising_emg.svg)](./mm_emg_example.ipynb)
 
 ## Citation
 
