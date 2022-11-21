@@ -6,7 +6,7 @@ import warnings
 
 from multimodal_emg import multimodal_fit
 from multimodal_emg import emg_envelope_model, emg_wave_model
-from multimodal_emg.regression.derivatives import emg_jac, wav_jac, oemg_jac
+from multimodal_emg.regression.derivatives import emg_jac, phi_jac, oemg_jac
 from multimodal_emg.regression.lib_handler import get_lib
 
 
@@ -44,7 +44,7 @@ def three_stage_fit(
         x=x,
         max_iter=max_iter,
         fun=emg_wave_model,
-        jac_fun=wav_jac,
+        jac_fun=phi_jac,
     )
 
     # add intermediate results to features
