@@ -151,6 +151,25 @@ def wav_jac(alpha=None, mu=None, sigma=None, eta=None, fkhz=None, phi=None, x=No
 
     return jacobian
 
+def phi_jac(alpha=None, mu=None, sigma=None, eta=None, fkhz=None, phi=None, x=None):
+
+    f_c = fkhz * 1e3
+
+    lib = get_lib(x)
+
+    erf_fun = torch.erf if lib.__name__ == 'torch' else erf
+
+    jacobian = -1 * lib.stack([
+        lib.zeros_like(x),
+        lib.zeros_like(x),
+        lib.zeros_like(x),
+        lib.zeros_like(x),
+        lib.zeros_like(x),
+        alpha*pd_oemg_wrt_phi(x, mu, sigma, eta, f_c, phi, exp_fun=lib.exp, erf_fun=erf_fun, sin_fun=lib.sin),
+    ])
+
+    return jacobian
+
 def components_jac(
         p, 
         model: Callable, 
