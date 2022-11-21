@@ -6,7 +6,7 @@ from pathlib import Path
 import h5py
 
 from multimodal_emg import batch_multimodal_fit
-from multimodal_emg import emg_envelope_model, emg_wave_model, emg_jac, wav_jac, oemg_jac
+from multimodal_emg import emg_envelope_model, emg_wave_model, emg_jac, phi_jac, oemg_jac
 from peak_detector import GradPeakDetector
 from peak_detector.plot_hyst import plot_hyst
 from peak_detector.plot_grad import plot_grad
@@ -109,7 +109,7 @@ class TestPicmusData(unittest.TestCase, BatchMultiModalPlot):
             x=self.t,
             max_iter=self.max_iter,
             fun=emg_wave_model,
-            jac_fun=wav_jac,
+            jac_fun=phi_jac,
         )
 
         result = result.squeeze(1).cpu().numpy()
