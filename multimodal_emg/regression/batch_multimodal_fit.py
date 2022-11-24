@@ -114,7 +114,7 @@ def batch_multimodal_model(
     feats_num = p.shape[-1] // components
     feats = p.view(-1, components, feats_num)    # view to batch x components x features 
 
-    # alpha, mu and sigma positive constraints
+    # positivity constraints for alpha, mu and sigma 
     feats[..., :3] = abs(feats[..., :3])
 
     # mu constraint
