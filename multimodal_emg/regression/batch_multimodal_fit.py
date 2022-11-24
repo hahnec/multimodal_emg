@@ -19,10 +19,11 @@ def batch_multimodal_fit(
         fun: Union[Callable, str] = None,
         jac_fun: Union[Callable, str] = None,
         loss_fun: Callable = None,
+        device: Union[str, torch.device] = None,
     ):
 
     # use GPU if available
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")if device is None else device
 
     # consider inconsistent number of components across batches
     if isinstance(features, (list, tuple)):
