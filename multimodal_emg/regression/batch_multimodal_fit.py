@@ -99,12 +99,12 @@ def batch_multimodal_fit(
 
     # infer result
     result = components_model_with_args(p_list[-1])
-    
-    # infer residuals
-    residuals = model(*p_list[-1].view(-1, p_list[-1].shape[-1] // components).T.unsqueeze(-1)).view(result.size(0), -1, result.size(-1))
-    
+
+    # infer components
+    data = model(*p_list[-1].view(-1, p_list[-1].shape[-1] // components).T.unsqueeze(-1)).view(result.size(0), -1, result.size(-1))
+
     # infer confidences for each component
-    confidences = 1/residuals.sum(-1)
+    confidences = 1 / torch.abs(data - result).sum(-1).nan_to_num(nan=torch.inf)
 
     return p_list[-1], result, confidences
 
@@ -135,9 +135,9 @@ def batch_multimodal_model(
     
     feats = feats.view(-1, feats_num).T.unsqueeze(-1)    # features x batch*components
 
-    residuals = model(*feats)
+    data = model(*feats)
     
     # split into batch and components while accumulating all components per batch
-    residuals = torch.nansum(residuals.view(batch_size, components, -1), -2)    # nansum to exclude masked components 
+    data = torch.nansum(data.view(batch_size, components, -1), -2)    # nansum to exclude masked components 
 
-    return residuals.unsqueeze(1)
+    return data.unsqueeze(1)
