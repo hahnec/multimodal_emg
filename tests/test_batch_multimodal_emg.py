@@ -105,7 +105,7 @@ class BatchEchoMultiModalTester(unittest.TestCase, BatchMultiModalPlot):
             max_iter=30,
             fun=emg_envelope_model,
             jac_fun=emg_jac,
-        )
+        )[:2]
 
         result = result.squeeze(1).cpu().numpy()
 
@@ -131,7 +131,7 @@ class BatchEchoMultiModalTester(unittest.TestCase, BatchMultiModalPlot):
             max_iter=30,
             fun=emg_wave_model,
             jac_fun=wav_jac,
-        )
+        )[:2]
 
         result = result.squeeze(1).cpu().numpy()
 
