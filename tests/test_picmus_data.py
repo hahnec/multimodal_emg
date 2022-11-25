@@ -82,7 +82,7 @@ class TestPicmusData(unittest.TestCase, BatchMultiModalPlot):
             max_iter=self.max_iter,
             fun=emg_envelope_model,
             jac_fun=emg_jac,
-        )
+        )[:2]
 
         result = result.squeeze(1).cpu().numpy()
 
@@ -110,7 +110,7 @@ class TestPicmusData(unittest.TestCase, BatchMultiModalPlot):
             max_iter=self.max_iter,
             fun=emg_wave_model,
             jac_fun=phi_jac,
-        )
+        )[:2]
 
         result = result.squeeze(1).cpu().numpy()
 
@@ -137,7 +137,7 @@ class TestPicmusData(unittest.TestCase, BatchMultiModalPlot):
             max_iter=self.max_iter,
             fun=emg_wave_model,
             jac_fun=oemg_jac,
-        )
+        )[:2]
 
         result = result.squeeze(1).cpu().numpy()
 
