@@ -51,7 +51,7 @@ def batch_multimodal_fit(
         assert len(features.shape) > 1, 'features must have at least 2 dimensions'
         p_init = features if isinstance(features, torch.Tensor) else torch.tensor(features)
 
-        feat_mask = torch.ones(p_init, dtype=bool, device=device)
+        feat_mask = torch.ones(p_init.shape, dtype=bool, device=device)
     
     else:
         raise Exception('Feature dimensionality not recognized')
