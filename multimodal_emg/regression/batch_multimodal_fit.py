@@ -128,6 +128,9 @@ def batch_multimodal_model(
         feats[..., 1][feats[..., 1] < mu_references-sigma_threshold/2] = mu_references[feats[..., 1] < mu_references-sigma_threshold/2] - sigma_threshold/2
         feats[..., 1][feats[..., 1] > mu_references+sigma_threshold/2] = mu_references[feats[..., 1] > mu_references+sigma_threshold/2] + sigma_threshold/2
 
+    # non-zero constraint for sigma 
+    feats[..., 2][feats[..., 2] == 0] = 1
+
     # phase in (-pi, pi] constraint by wrapping values into co-domain
     if feats_num > 4:
         feats[..., 5][feats[..., 5] < -PI] += 2*PI

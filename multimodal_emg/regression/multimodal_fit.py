@@ -59,7 +59,7 @@ def multimodal_fit(
         jac_fun_with_args = '2-point'
 
     # optimization
-    p_star = least_squares(cost_fun, p_init, jac=jac_fun_with_args, max_nfev=max_iter).x
+    p_star = least_squares(cost_fun, p_init, jac=jac_fun_with_args, max_nfev=max_iter, method='lm').x
 
     # infer result
     result = components_model_with_args(p_star)
@@ -79,16 +79,18 @@ def multimodal_model(
 
     for i in range(1, components):
 
+        # alpha, mu, sigma positive constraints
+        p[(i-1)*n:(i-1)*n+3] = abs(p[(i-1)*n:(i-1)*n+3])
+
         # mu constraint
         if mu_references is not None:
             if p[(i-1)*n+1] < mu_references[i-1]-sigma_constraint/2: p[(i-1)*n+1] = mu_references[i-1] - sigma_constraint/2
             if p[(i-1)*n+1] > mu_references[i-1]+sigma_constraint/2: p[(i-1)*n+1] = mu_references[i-1] + sigma_constraint/2
-            
+
         # upper sigma constraint
         if p[(i-1)*n+2] > sigma_constraint: p[(i-1)*n+2] = sigma_constraint
-
-        # alpha, mu, sigma positive constraints
-        p[(i-1)*n:(i-1)*n+3] = abs(p[(i-1)*n:(i-1)*n+3])
+        # lower sigma constraint
+        if p[(i-1)*n+2] == 0: p[(i-1)*n+2] = 1
 
         # phase in (-pi, pi] constraint by wrapping values into co-domain
         if n > 4 and not(-PI < p[i*n-1] < PI): 
