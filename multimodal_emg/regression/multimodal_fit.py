@@ -93,7 +93,8 @@ def multimodal_model(
         if p[(i-1)*n+2] == 0: p[(i-1)*n+2] = 1
 
         # phase in (-pi, pi] constraint by wrapping values into co-domain
-        if n > 4 and not(-PI < p[i*n-1] < PI): 
+        if n > 4 and not(-PI < p[i*n-1] < PI):
+            if not -2*PI < p[i*n-1] < +2*PI: p[i*n-1] = 0
             p[i*n-1] += 2*PI if p[i*n-1] < 0 else -2*PI
 
         d += model(*p[i*n:(i+1)*n])
