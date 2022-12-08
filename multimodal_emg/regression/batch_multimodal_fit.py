@@ -133,6 +133,7 @@ def batch_multimodal_model(
 
     # phase in (-pi, pi] constraint by wrapping values into co-domain
     if feats_num > 4:
+        feats[..., 5][(feats[..., 5] < -2*PI) | (feats[..., 5] > +2*PI)] = 0
         feats[..., 5][feats[..., 5] < -PI] += 2*PI
         feats[..., 5][feats[..., 5] > +PI] -= 2*PI
     
