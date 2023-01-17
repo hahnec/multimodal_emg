@@ -1,26 +1,30 @@
 from tests.test_multimodal_dtype import MultimodalTester
 from tests.test_multimodal_emg import EchoMultiModalTester
 from tests.test_batch_multimodal_emg import BatchEchoMultiModalTester
+from tests.test_peak_detect import PeakDetectTester
 from tests.test_picmus_data import TestPicmusData
 
-test_classes = [
-    MultimodalTester,
-    EchoMultiModalTester,
-    BatchEchoMultiModalTester,
-    TestPicmusData,
-                ]
 
-for test_class in test_classes:
+if __name__ == '__main__':
 
-    # instantiate test object
-    obj = test_class()
-    obj.setUp()
+    test_classes = [
+        MultimodalTester,
+        EchoMultiModalTester,
+        BatchEchoMultiModalTester,
+        TestPicmusData,
+                    ]
 
-    # switch off plots for headless
-    obj.plot_opt = False
+    for test_class in test_classes:
 
-    obj.main()
+        # instantiate test object
+        obj = test_class()
+        obj.setUp()
 
-    del obj
+        # switch off plots for headless
+        obj.plot_opt = False
 
-print('\nRan through all tests')
+        obj.main()
+
+        del obj
+
+    print('\nRan through all tests')
