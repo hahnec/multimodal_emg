@@ -57,7 +57,7 @@ def batch_multimodal_fit(
         raise Exception('Feature dimensionality not recognized')
 
     # prepare variables
-    p_init = p_init.view(p_init.shape[0], -1)
+    p_init = p_init.reshape(p_init.shape[0], -1)
     p_init = p_init.to(device) if isinstance(p_init, torch.Tensor) else p_init
     data = data.to(device, dtype=torch.float64) if isinstance(data, torch.Tensor) else torch.tensor(data, device=device, dtype=torch.float64)
     batch_size = p_init.shape[0]
