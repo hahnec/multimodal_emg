@@ -37,9 +37,13 @@ def grad_peak_detect(data, grad_step: int=None, threshold: float=None, ival_smin
     for i in range(batch_size):
         ap = args_plus[args_plus[:, 0]==i, 1].unsqueeze(1)#.float()
         am = args_minu[args_minu[:, 0]==i, 1].unsqueeze(0)#.float()
+        if ap.numel() == 0 or am.numel() == 0:
+            peak_list.append(torch.tensor([], device=data.device))
+            continue
         #torch.cdist(am.T.float(), ap.float()).T
         dmat = am - ap.repeat((1, am.shape[1]))
         echo_peak_idcs = torch.argmin(abs(dmat), dim=0)
+
         #mask = (dmat > ival_list[0]) & (dmat < ival_list[1])
         candidates = torch.hstack([ap[echo_peak_idcs], am.T])
 
@@ -49,8 +53,8 @@ def grad_peak_detect(data, grad_step: int=None, threshold: float=None, ival_smin
 
         # gradient peak uniqueness constraint
         apu, uniq_idcs = torch.unique(candidates[:, 0], return_inverse=True)
-        amu = candidates[torch.diff(uniq_idcs, prepend=torch.tensor([-1], device=apu.device))>0, 1]
-        peaks = torch.stack([apu, amu]).T
+        amu = candidates[torch.diff(uniq_idcs.flatten(), prepend=torch.tensor([-1], device=apu.device))>0, 1]
+        peaks = torch.stack([apu.flatten(), amu.flatten()]).T
 
         peak_list.append(peaks)
         if len(peaks) > max_len: max_len = len(peaks)
