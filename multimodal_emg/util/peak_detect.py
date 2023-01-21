@@ -21,13 +21,9 @@ def grad_peak_detect(data, grad_step: int=None, threshold: float=None, ival_smin
     grad_plus = grad_data > thres_pos
     grad_minu = grad_data < thres_neg
 
-    # remove isolated threshold breakthroughs
-    filt_plus = grad_plus#ndimage.binary_opening(grad_plus, iterations=4)
-    filt_minu = grad_minu#ndimage.binary_opening(grad_minu, iterations=4)
-
     # get potential echo positions
-    peak_plus = torch.diff((filt_plus==1).int(), axis=-1)
-    peak_minu = torch.diff((filt_minu==1).int(), axis=-1)
+    peak_plus = torch.diff((grad_plus==1).int(), axis=-1)
+    peak_minu = torch.diff((grad_minu==1).int(), axis=-1)
     args_plus = torch.argwhere(peak_plus==1)#.flatten()
     args_minu = torch.argwhere(peak_minu==1)#.flatten()
 
