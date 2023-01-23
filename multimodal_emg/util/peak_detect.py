@@ -55,11 +55,7 @@ def grad_peak_detect(data, grad_step: int=None, threshold: float=None, ival_smin
         if len(peaks) > max_len: max_len = len(peaks)
 
     # convert list to tensor: batch_size x echo_num x (xy)-coordinates
-    try:
-        batch_peaks = torch.tensor([torch.hstack([echoes, data[i, echoes[:, 1][:, None]]]).tolist()+[[0,0,0],]*(max_len-len(echoes)) if len(echoes) > 0 else [[0,0,0],]*max_len for i, echoes in enumerate(peak_list)], dtype=data.dtype, device=data.device)
-    except Exception:
-        print([echoes.shape for i, echoes in enumerate(peak_list)])
-        print([echoes[:, 1][:, None] for i, echoes in enumerate(peak_list)])
+    batch_peaks = torch.tensor([torch.hstack([echoes, data[i, echoes[:, 1][:, None]]]).tolist()+[[0,0,0],]*(max_len-len(echoes)) if len(echoes) > 0 else [[0,0,0],]*max_len for i, echoes in enumerate(peak_list)], dtype=data.dtype, device=data.device)
 
     return batch_peaks
 
