@@ -36,11 +36,10 @@ def grad_peak_detect(data, grad_step: int=None, threshold: float=None, ival_smin
         if ap.numel() == 0 or am.numel() == 0:
             peak_list.append(torch.tensor([], device=data.device))
             continue
-        #torch.cdist(am.T.float(), ap.float()).T
-        dmat = am - ap.repeat((1, am.shape[1]))
-        echo_peak_idcs = torch.argmin(abs(dmat), dim=0)
 
-        #mask = (dmat > ival_list[0]) & (dmat < ival_list[1])
+        dmat = am - ap.repeat((1, am.shape[1]))
+        dmat[dmat<0] = 2**32 # constraint that only differences for ap occuring before am are valid
+        echo_peak_idcs = torch.argmin(abs(dmat), dim=0)
         candidates = torch.hstack([ap[echo_peak_idcs], am.T])
 
         # constraint that only differences for ap occuring before am are valid
@@ -56,7 +55,7 @@ def grad_peak_detect(data, grad_step: int=None, threshold: float=None, ival_smin
         if len(peaks) > max_len: max_len = len(peaks)
 
     # convert list to tensor: batch_size x echo_num x (xy)-coordinates
-    batch_peaks = torch.tensor([echoes.tolist()+[[0,0],]*(max_len-len(echoes)) for echoes in peak_list], device=data.device)
+    batch_peaks = torch.tensor([torch.hstack([echoes, data[i, echoes[:, 0]][:, None], data[i, echoes[:, 1][:, None]]]).tolist()+[[0,0,0,0],]*(max_len-len(echoes)) for i, echoes in enumerate(peak_list)], dtype=data.dtype, device=data.device)
 
     return batch_peaks
 

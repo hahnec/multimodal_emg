@@ -27,11 +27,11 @@ def batch_staged_memgo(
 
     # echo detection, tbd: test adapative threshold: remove threshold argument
     batch_hilbert_data = abs(hilbert_transform(batch_data_arr))
-    batch_echoes = grad_peak_detect(batch_hilbert_data, grad_step=cfg.enlarge_factor/6*5)#, threshold=0.0825*0.9
+    batch_echoes = grad_peak_detect(batch_hilbert_data, grad_step=cfg.enlarge_factor/6*5, ival_smin=0, ival_smax=500*cfg.enlarge_factor)
     echo_num = batch_echoes.shape[1]
     
     # add amplitude and width approximations
-    amplitudes = batch_hilbert_data.reshape(-1)[batch_echoes.reshape(-1, 2)[:, 1]].reshape(batch_size, -1)
+    amplitudes = batch_echoes[..., 3]
     batch_echo_feats = torch.stack([amplitudes, batch_echoes[..., 1], (batch_echoes[..., 1]-batch_echoes[..., 0])/2.5, torch.zeros(amplitudes.shape, device=data_arr.device)]).swapaxes(0, -1).swapaxes(0, 1)
 
     if print_opt: print('MEMGO preparation: %s' % str(round(time.time()-start, 4)))
