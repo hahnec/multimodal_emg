@@ -31,7 +31,7 @@ def batch_staged_memgo(
     echo_num = batch_echoes.shape[1]
     
     # add amplitude and width approximations
-    amplitudes = batch_echoes[..., 3]
+    amplitudes = batch_echoes[..., -1]
     batch_echo_feats = torch.stack([amplitudes, batch_echoes[..., 1], (batch_echoes[..., 1]-batch_echoes[..., 0])/2.5, torch.zeros(amplitudes.shape, device=data_arr.device)]).swapaxes(0, -1).swapaxes(0, 1)
 
     if print_opt: print('MEMGO preparation: %s' % str(round(time.time()-start, 4)))
