@@ -15,6 +15,7 @@ def batch_staged_memgo(
         x: torch.Tensor,
         cfg: Dict = {},
         max_iter_per_stage: int = None,
+        echo_threshold: float = None,
         plot_opt: bool = False,
         print_opt: bool = False,
         ):
@@ -25,9 +26,9 @@ def batch_staged_memgo(
     batch_size = data_arr.shape[-1]
     batch_data_arr = data_arr.clone().T
 
-    # echo detection, tbd: test adapative threshold: remove threshold argument
+    # echo detection
     batch_hilbert_data = abs(hilbert_transform(batch_data_arr))
-    batch_echoes = grad_peak_detect(batch_hilbert_data, grad_step=cfg.enlarge_factor/6*5, ival_smin=0, ival_smax=500*cfg.enlarge_factor)
+    batch_echoes = grad_peak_detect(batch_hilbert_data, grad_step=cfg.enlarge_factor/6*5, ival_smin=0, ival_smax=500*cfg.enlarge_factor, threshold=threshold)
     echo_num = batch_echoes.shape[1]
     
     # add amplitude and width approximations
