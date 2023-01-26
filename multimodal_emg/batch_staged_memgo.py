@@ -28,7 +28,7 @@ def batch_staged_memgo(
 
     # echo detection
     batch_hilbert_data = abs(hilbert_transform(batch_data_arr))
-    batch_echoes = grad_peak_detect(batch_hilbert_data, grad_step=cfg.enlarge_factor/6*5, ival_smin=0, ival_smax=500*cfg.enlarge_factor, threshold=threshold)
+    batch_echoes = grad_peak_detect(batch_hilbert_data, grad_step=cfg.enlarge_factor/6*5, ival_smin=0, ival_smax=500*cfg.enlarge_factor, threshold=echo_threshold)
     echo_num = batch_echoes.shape[1]
     
     # add amplitude and width approximations
