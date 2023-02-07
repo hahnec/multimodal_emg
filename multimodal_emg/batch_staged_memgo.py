@@ -11,7 +11,7 @@ from multimodal_emg.util.peak_detect import grad_peak_detect
 
 
 def batch_staged_memgo(
-        data_arr: torch.Tensor,
+        batch_data_arr: torch.Tensor,
         x: torch.Tensor,
         max_iter_per_stage: int = None,
         echo_threshold: float = None,
@@ -24,8 +24,7 @@ def batch_staged_memgo(
 
     start = time.time()
 
-    batch_size = data_arr.shape[-1]
-    batch_data_arr = data_arr.clone().T
+    batch_size = batch_data_arr.shape[-1]
     max_iter_per_stage = 8 if max_iter_per_stage is None else max_iter_per_stage
     grad_step = 1 if grad_step is None else grad_step
     upsample_factor = 1 if upsample_factor is None else upsample_factor
@@ -38,7 +37,7 @@ def batch_staged_memgo(
     
     # add amplitude and width approximations
     amplitudes = batch_echoes[..., -1]
-    batch_echo_feats = torch.stack([amplitudes, batch_echoes[..., 1], (batch_echoes[..., 1]-batch_echoes[..., 0])/2.5, torch.zeros(amplitudes.shape, device=data_arr.device)]).swapaxes(0, -1).swapaxes(0, 1)
+    batch_echo_feats = torch.stack([amplitudes, batch_echoes[..., 1], (batch_echoes[..., 1]-batch_echoes[..., 0])/2.5, torch.zeros(amplitudes.shape, device=batch_data_arr.device)]).swapaxes(0, -1).swapaxes(0, 1)
 
     if print_opt: print('MEMGO preparation: %s' % str(round(time.time()-start, 4)))
 
@@ -51,7 +50,7 @@ def batch_staged_memgo(
         max_iter=max_iter_per_stage,
         fun=emg_envelope_model,
         jac_fun=emg_jac,
-        device=data_arr.device,
+        device=batch_data_arr.device,
     )
 
     if print_opt: print('MEMGO step 1: %s' % str(round(time.time()-start, 4)))
@@ -76,7 +75,7 @@ def batch_staged_memgo(
         max_iter=max_iter_per_stage,
         fun=emg_wave_model,
         jac_fun=wav_jac,
-        device=data_arr.device,
+        device=batch_data_arr.device,
     )
 
     if print_opt: print('MEMGO step 2: %s' % str(round(time.time()-start, 4)))
@@ -97,7 +96,7 @@ def batch_staged_memgo(
         max_iter=max_iter_per_stage,
         fun=emg_wave_model,
         jac_fun=oemg_jac,
-        device=data_arr.device,
+        device=batch_data_arr.device,
     )
 
     if print_opt: print('MEMGO step 3: %s' % str(round(time.time()-start, 4)))
