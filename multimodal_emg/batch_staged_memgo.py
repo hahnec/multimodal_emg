@@ -16,6 +16,7 @@ def batch_staged_memgo(
         cfg: Dict = {},
         max_iter_per_stage: int = None,
         echo_threshold: float = None,
+        grad_step: int = None,
         plot_opt: bool = False,
         print_opt: bool = False,
         ):
@@ -25,10 +26,11 @@ def batch_staged_memgo(
     max_iter_per_stage = 8 if max_iter_per_stage is None else max_iter_per_stage
     batch_size = data_arr.shape[-1]
     batch_data_arr = data_arr.clone().T
+    grad_step = 1 if grad_step is None else grad_step
 
     # echo detection
     batch_hilbert_data = abs(hilbert_transform(batch_data_arr))
-    batch_echoes = grad_peak_detect(batch_hilbert_data, grad_step=cfg.enlarge_factor/6*5, ival_smin=0, ival_smax=500*cfg.enlarge_factor, threshold=echo_threshold)
+    batch_echoes = grad_peak_detect(batch_hilbert_data, grad_step=grad_step, ival_smin=0, ival_smax=500*cfg.enlarge_factor, threshold=echo_threshold)
     echo_num = batch_echoes.shape[1]
     
     # add amplitude and width approximations
