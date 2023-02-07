@@ -17,6 +17,7 @@ def batch_staged_memgo(
         echo_threshold: float = None,
         grad_step: int = None,
         upsample_factor: int = None,
+        fs: float = None,
         plot_opt: bool = False,
         print_opt: bool = False,
         ):
@@ -28,6 +29,7 @@ def batch_staged_memgo(
     max_iter_per_stage = 8 if max_iter_per_stage is None else max_iter_per_stage
     grad_step = 1 if grad_step is None else grad_step
     upsample_factor = 1 if upsample_factor is None else upsample_factor
+    fs = 1 if fs is None else fs
 
     # echo detection
     batch_hilbert_data = abs(hilbert_transform(batch_data_arr))
