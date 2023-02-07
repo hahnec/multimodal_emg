@@ -13,24 +13,25 @@ from multimodal_emg.util.peak_detect import grad_peak_detect
 def batch_staged_memgo(
         data_arr: torch.Tensor,
         x: torch.Tensor,
-        cfg: Dict = {},
         max_iter_per_stage: int = None,
         echo_threshold: float = None,
         grad_step: int = None,
+        upsample_factor: int = None,
         plot_opt: bool = False,
         print_opt: bool = False,
         ):
 
     start = time.time()
 
-    max_iter_per_stage = 8 if max_iter_per_stage is None else max_iter_per_stage
     batch_size = data_arr.shape[-1]
     batch_data_arr = data_arr.clone().T
+    max_iter_per_stage = 8 if max_iter_per_stage is None else max_iter_per_stage
     grad_step = 1 if grad_step is None else grad_step
+    upsample_factor = 1 if upsample_factor is None else upsample_factor
 
     # echo detection
     batch_hilbert_data = abs(hilbert_transform(batch_data_arr))
-    batch_echoes = grad_peak_detect(batch_hilbert_data, grad_step=grad_step, ival_smin=0, ival_smax=500*cfg.enlarge_factor, threshold=echo_threshold)
+    batch_echoes = grad_peak_detect(batch_hilbert_data, grad_step=grad_step, ival_smin=0, ival_smax=500*upsample_factor, threshold=echo_threshold)
     echo_num = batch_echoes.shape[1]
     
     # add amplitude and width approximations
@@ -55,11 +56,10 @@ def batch_staged_memgo(
 
     # add oscillating estimates frequency and phase for optimization
     batch_echo_feats = torch.dstack([batch_echo_feats, torch.zeros(batch_echo_feats.shape[:2], device=x.device), torch.zeros(batch_echo_feats.shape[:2], device=x.device)])
-    fkHz = cfg.fs/1e3
+    fkHz = fs/1e3
     for i in range(len(batch_echo_feats)):
         feats = [p_star[i][j*4:(j+1)*4].cpu().numpy().tolist() + [fkHz, 0] for j in range(echo_num)]
-        #batch_echo_feats[i] = [[feat[0], feat[1]/(cfg.fs*cfg.enlarge_factor), feat[2]/(cfg.fs*cfg.enlarge_factor), feat[3], feat[4], feat[5]] for feat in feats]
-        batch_echo_feats[i] = torch.tensor([[feat[0], feat[1]/(cfg.fs*cfg.enlarge_factor), feat[2]/(cfg.fs*cfg.enlarge_factor), feat[3], feat[4], feat[5]] for feat in feats])
+        batch_echo_feats[i] = torch.tensor([[feat[0], feat[1]/(fs*upsample_factor), feat[2]/(fs*upsample_factor), feat[3], feat[4], feat[5]] for feat in feats])
 
     p = init_phase(batch_echo_feats, batch_data_arr[:, ::1], x[::1])
 
