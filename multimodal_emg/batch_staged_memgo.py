@@ -18,6 +18,7 @@ def batch_staged_memgo(
         grad_step: int = None,
         upsample_factor: int = None,
         fs: float = None,
+        skip_oscil: bool = False,
         plot_opt: bool = False,
         print_opt: bool = False,
         ):
@@ -42,7 +43,7 @@ def batch_staged_memgo(
     if print_opt: print('MEMGO preparation: %s' % str(round(time.time()-start, 4)))
 
     # multimodal optimization
-    p_star, result, _ = batch_multimodal_fit(
+    p_star, result, conf = batch_multimodal_fit(
         batch_hilbert_data,
         features=batch_echo_feats,
         components=echo_num,
@@ -54,6 +55,9 @@ def batch_staged_memgo(
     )
 
     if print_opt: print('MEMGO step 1: %s' % str(round(time.time()-start, 4)))
+
+    if skip_oscil:
+        return p_star, result, conf, batch_echoes
 
     # add oscillating estimates frequency and phase for optimization
     batch_echo_feats = torch.dstack([batch_echo_feats, torch.zeros(batch_echo_feats.shape[:2], device=x.device), torch.zeros(batch_echo_feats.shape[:2], device=x.device)])
