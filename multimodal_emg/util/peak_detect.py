@@ -87,7 +87,7 @@ def gaussian_filter_1d(data: torch.Tensor, sigma: float) -> torch.Tensor:
     #kernel_1d = gaussian_fn(int(3*sigma)+1, sigma).double().to(data.device)  # Create 1D Gaussian kernel
     
     padding = len(kernel_1d) // 2  # Ensure that image size does not change
-    data = data.unsqueeze(1)#.unsqueeze_(0)  # Need 4D data for ``conv2d()``
+    data = data.unsqueeze(1) if len(data.shape) == 2 else data #.unsqueeze_(0)  # Need 4D data for ``conv2d()``
     # Convolve along columns and rows
     #data = conv1d(data, weight=kernel_1d.view(1, 1, -1, 1), padding=(padding, 0))
     #data = conv2d(data, weight=kernel_1d.view(1, 1, 1, -1), padding=(0, padding))
