@@ -104,7 +104,7 @@ def batch_multimodal_fit(
     data = model(*p_list[-1].view(-1, p_list[-1].shape[-1] // components).T.unsqueeze(-1)).view(result.size(0), -1, result.size(-1))
 
     # infer confidences for each component
-    confidences = 1 / torch.abs(data - result).sum(-1).nan_to_num(nan=torch.inf)
+    confidences = (1 / torch.abs(data - result).sum(-1)).nan_to_num(nan=torch.nan_to_num(torch.tensor(1)))
 
     return p_list[-1], result, confidences
 
