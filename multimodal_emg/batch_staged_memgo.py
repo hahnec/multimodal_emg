@@ -25,7 +25,6 @@ def batch_staged_memgo(
 
     start = time.time()
 
-    batch_size = batch_data_arr.shape[-1]
     max_iter_per_stage = 8 if max_iter_per_stage is None else max_iter_per_stage
     grad_step = 1 if grad_step is None else grad_step
     upsample_factor = 1 if upsample_factor is None else upsample_factor
@@ -35,6 +34,12 @@ def batch_staged_memgo(
     batch_hilbert_data = abs(hilbert_transform(batch_data_arr))
     batch_echoes = grad_peak_detect(batch_hilbert_data, grad_step=grad_step, ival_smin=0, ival_smax=500*upsample_factor, threshold=echo_threshold)
     echo_num = batch_echoes.shape[1]
+
+    if echo_num == 0:
+        batch_size = batch_data_arr.shape[0]
+        param_num = 4 if skip_oscil else 6
+        p_star = torch.zeros([batch_size, param_num], device=x.device, dtype=x.dtype)
+        return p_star, torch.zeros_like(x), torch.zeros(batch_size, device=x.device), batch_echoes
     
     # add amplitude and width approximations
     amplitudes = batch_echoes[..., -1]

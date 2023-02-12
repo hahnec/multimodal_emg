@@ -48,6 +48,9 @@ def grad_peak_detect(data, grad_step: int=None, threshold: float=None, ival_smin
 
         # ensure candidates consists of 2 dimensions
         candidates = candidates.squeeze(0) if len(candidates.shape) > 2 else candidates
+
+        if candidates.numel() == 0:
+            return torch.tensor([[], [], []])
         
         # gradient peak uniqueness constraint
         apu, uniq_idcs = torch.unique(candidates[:, 0], return_inverse=True)
