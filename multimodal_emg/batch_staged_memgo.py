@@ -39,7 +39,7 @@ def batch_staged_memgo(
         batch_size = batch_data_arr.shape[0]
         param_num = 4 if skip_oscil else 6
         p_star = torch.zeros([batch_size, param_num], device=x.device, dtype=x.dtype)
-        return p_star, torch.zeros_like(x), torch.zeros(batch_size, device=x.device), batch_echoes
+        return p_star, torch.zeros_like(batch_data_arr), torch.zeros([batch_size, 1], device=x.device), batch_echoes
     
     # add amplitude and width approximations
     amplitudes = batch_echoes[..., -1]
