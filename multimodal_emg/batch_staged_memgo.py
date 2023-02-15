@@ -62,7 +62,7 @@ def batch_staged_memgo(
     if print_opt: print('MEMGO step 1: %s' % str(round(time.time()-start, 4)))
 
     if skip_oscil:
-        return p_star, result, conf, batch_echoes
+        return p_star.view(-1, echo_num, 4), result, conf, batch_echoes
 
     # add oscillating estimates frequency and phase for optimization
     batch_echo_feats = torch.dstack([batch_echo_feats, torch.zeros(batch_echo_feats.shape[:2], device=x.device), torch.zeros(batch_echo_feats.shape[:2], device=x.device)])
