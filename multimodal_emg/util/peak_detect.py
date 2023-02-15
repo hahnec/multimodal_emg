@@ -71,28 +71,24 @@ def gaussian_kernel_1d(sigma: float, num_sigmas: float = 3.) -> torch.Tensor:
     radius = int(num_sigmas * sigma)+1 # ceil
     support = torch.arange(-radius, radius + 1, dtype=torch.float64)
     kernel = Normal(loc=0, scale=sigma).log_prob(support).exp_()
-    # Ensure kernel weights sum to 1, so that image brightness is not altered
     return kernel.mul_(1 / kernel.sum())
 
 
 def gaussian_fn(M, std):
+
     n = torch.arange(0, M) - (M - 1.0) / 2.0
     sig2 = 2 * std * std
     w = torch.exp(-n ** 2 / sig2)
-    w /= w.sum()#max()#
-    #norm_term = (1/(2*torch.pi)**.5*std)#/w.sum()
-    return w#/norm_term
+    w /= w.sum()
+
+    return w
 
 
 def gaussian_filter_1d(data: torch.Tensor, sigma: float) -> torch.Tensor:
     
-    kernel_1d = gaussian_kernel_1d(sigma).to(data.device)  # Create 1D Gaussian kernel
-    #kernel_1d = gaussian_fn(int(3*sigma)+1, sigma).double().to(data.device)  # Create 1D Gaussian kernel
-    
-    padding = len(kernel_1d) // 2  # Ensure that image size does not change
-    data = data.unsqueeze(1) if len(data.shape) == 2 else data #.unsqueeze_(0)  # Need 4D data for ``conv2d()``
-    # Convolve along columns and rows
-    #data = conv1d(data, weight=kernel_1d.view(1, 1, -1, 1), padding=(padding, 0))
-    #data = conv2d(data, weight=kernel_1d.view(1, 1, 1, -1), padding=(0, padding))
+    kernel_1d = gaussian_kernel_1d(sigma).to(data.device)
+    padding = len(kernel_1d) // 2
+    data = data.unsqueeze(1) if len(data.shape) == 2 else data
     data = conv1d(data, weight=kernel_1d.view(1, 1, -1), padding=padding)
-    return data.squeeze(1)#.squeeze_(0)  # Make 2D again
+
+    return data.squeeze(1)
