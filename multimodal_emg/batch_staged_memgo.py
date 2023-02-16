@@ -18,7 +18,7 @@ def batch_staged_memgo(
         grad_step: int = None,
         upsample_factor: int = None,
         fs: float = None,
-        skip_oscil: bool = False,
+        oscil_opt: bool = True,
         plot_opt: bool = False,
         print_opt: bool = False,
         ):
@@ -31,19 +31,19 @@ def batch_staged_memgo(
     fs = 1 if fs is None else fs
 
     # echo detection
-    batch_hilbert_data = abs(hilbert_transform(batch_data_arr))
+    batch_hilbert_data = abs(hilbert_transform(batch_data_arr)) if oscil_opt else batch_data_arr
     batch_echoes = grad_peak_detect(batch_hilbert_data, grad_step=grad_step, ival_smin=0, ival_smax=500*upsample_factor, threshold=echo_threshold)
     echo_num = batch_echoes.shape[1]
 
     if echo_num == 0:
         batch_size = batch_data_arr.shape[0]
-        param_num = 4 if skip_oscil else 6
+        param_num = 6 if oscil_opt else 4
         p_star = torch.zeros([batch_size, param_num], device=x.device, dtype=x.dtype)
         return p_star, torch.zeros_like(batch_data_arr), torch.zeros([batch_size, 1], device=x.device), batch_echoes
     
     # add amplitude and width approximations
-    amplitudes = batch_echoes[..., -1]
-    batch_echo_feats = torch.stack([amplitudes, batch_echoes[..., 1], (batch_echoes[..., 1]-batch_echoes[..., 0])/2.5, torch.zeros(amplitudes.shape, device=batch_data_arr.device)]).swapaxes(0, -1).swapaxes(0, 1)
+    sig_init = (batch_echoes[..., 1]-batch_echoes[..., 0])/2.5+1e-4
+    batch_echo_feats = torch.stack([batch_echoes[..., -1], batch_echoes[..., 1], sig_init, torch.zeros_like(sig_init)]).swapaxes(0, -1).swapaxes(0, 1)
 
     if print_opt: print('MEMGO preparation: %s' % str(round(time.time()-start, 4)))
 
@@ -52,16 +52,15 @@ def batch_staged_memgo(
         batch_hilbert_data,
         features=batch_echo_feats,
         components=echo_num,
-        x=torch.arange(0, len(x)),
+        x=torch.arange(0, len(x), device=x.device),
         max_iter=max_iter_per_stage,
         fun=emg_envelope_model,
         jac_fun=emg_jac,
-        device=batch_data_arr.device,
     )
 
     if print_opt: print('MEMGO step 1: %s' % str(round(time.time()-start, 4)))
 
-    if skip_oscil:
+    if not oscil_opt:
         return p_star.view(-1, echo_num, 4), result, conf, batch_echoes
 
     # add oscillating estimates frequency and phase for optimization
@@ -84,7 +83,6 @@ def batch_staged_memgo(
         max_iter=max_iter_per_stage,
         fun=emg_wave_model,
         jac_fun=wav_jac,
-        device=batch_data_arr.device,
     )
 
     if print_opt: print('MEMGO step 2: %s' % str(round(time.time()-start, 4)))
@@ -105,7 +103,6 @@ def batch_staged_memgo(
         max_iter=max_iter_per_stage,
         fun=emg_wave_model,
         jac_fun=oemg_jac,
-        device=batch_data_arr.device,
     )
 
     if print_opt: print('MEMGO step 3: %s' % str(round(time.time()-start, 4)))
