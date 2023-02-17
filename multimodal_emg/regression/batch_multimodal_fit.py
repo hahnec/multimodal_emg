@@ -75,8 +75,6 @@ def batch_multimodal_fit(
 
     # optimization
     p_list = lsq_lma_parallel(p_init, cost_fun, jac_function=jac_fun_with_args, wvec=wvec, max_iter=max_iter, ftol=0)
-    #p_list = lsq_gna_parallel(p_init, cost_fun, jac_function=jac_fun_with_args, wvec=wvec, max_iter=max_iter, l=0.1)
-    #p_list = lsq_gna_parallel_plain(p_init, cost_fun, jac_function=jac_fun_with_args, wvec=wvec, max_iter=max_iter)
 
     # infer result
     result = components_model_with_args(p_list[-1])

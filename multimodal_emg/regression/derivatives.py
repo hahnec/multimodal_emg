@@ -209,9 +209,6 @@ def batch_components_jac(
     feats = feats.view(-1, feats_num).T.unsqueeze(-1)    # features x batch*components
 
     jac = jac_component_with_args(feats)
-    #jac = torch.swapaxes(jac.view(data.shape[-1], -1, components, feats_num), 0, 1).flatten(start_dim=2)   # with transpose
-    #jac = torch.swapaxes(jac.reshape(data.shape[-1], -1, components*feats_num), 0, 1)  # with transpose
-    #jac = torch.swapaxes(torch.swapaxes(jac.reshape(components*feats_num, -1, data.shape[-1]), 0, 1), 1, 2)  # without transpose
     jac = jac.swapaxes(0, 2).reshape(data.shape[-1], -1, components*feats_num).swapaxes(0, 1)
     jac = torch.nan_to_num(jac, nan=0)
     d = c * jac.unsqueeze(1)
