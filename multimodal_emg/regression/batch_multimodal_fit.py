@@ -68,7 +68,7 @@ def batch_multimodal_fit(
 
     # pass args to jacobian function
     if isinstance(jac_fun, Callable):
-        emg_jac_with_args = lambda p: jac_fun(*p, x=x)
+        emg_jac_with_args = lambda p: jac_fun(*p, x=torch.tile(x, dims=(batch_size*components, 1)))
         jac_fun_with_args = lambda p: batch_components_jac(p, components_model_with_args, data, components, emg_jac_with_args)
     else:
         jac_fun_with_args = '2-point'
