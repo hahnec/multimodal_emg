@@ -13,7 +13,7 @@ def grad_peak_detect(data, grad_step: int=None, threshold: float=None, ival_smin
     grad_data = gaussian_filter_1d(grad_data, sigma=(grad_step*2-1)/6)
 
     # parameter init (defaults are heuristics)
-    thres_pos = threshold if threshold is not None else (grad_data.max()+grad_data.mean())/15
+    thres_pos = threshold if threshold is not None else (grad_data.std()**16)*1.2e13
     thres_neg = -thres_pos/4
     ival_list = [ival_smin, ival_smax] if ival_smin is not None and ival_smax is not None else [grad_step//2, grad_step*3]
 
