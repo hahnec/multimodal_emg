@@ -15,6 +15,7 @@ def batch_staged_memgo(
         x: torch.Tensor,
         max_iter_per_stage: int = None,
         echo_threshold: float = None,
+        echo_max: int = None,
         grad_step: int = None,
         upsample_factor: int = None,
         fs: float = None,
@@ -29,13 +30,20 @@ def batch_staged_memgo(
     grad_step = 1 if grad_step is None else grad_step
     upsample_factor = 1 if upsample_factor is None else upsample_factor
     fs = 1 if fs is None else fs
+    echo_max = float('inf') if echo_max is None else echo_max
 
     # echo detection
     batch_hilbert_data = abs(hilbert_transform(batch_data_arr)) if oscil_opt else batch_data_arr
     batch_echoes = grad_peak_detect(batch_hilbert_data, grad_step=grad_step, ival_smin=0, ival_smax=500*upsample_factor, threshold=echo_threshold)
     echo_num = batch_echoes.shape[1]
 
-    if echo_num == 0:
+    # optional: use consistent number of echoes for deterministic computation time
+    if echo_num > echo_max:
+        # sort by maximum amplitude
+        idcs = torch.argsort(batch_echoes[..., -1], descending=True, dim=1)
+        batch_echoes = torch.gather(batch_echoes, dim=1, index=idcs[..., None].repeat(1,1,3))[:, :echo_max]
+        echo_num = echo_max
+    elif echo_num == 0:
         batch_size = batch_data_arr.shape[0]
         param_num = 6 if oscil_opt else 4
         p_star = torch.zeros([batch_size, param_num], device=x.device, dtype=x.dtype)
