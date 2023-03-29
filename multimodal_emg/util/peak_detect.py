@@ -86,7 +86,7 @@ def gaussian_fn(M, std):
 
 def gaussian_filter_1d(data: torch.Tensor, sigma: float) -> torch.Tensor:
     
-    kernel_1d = gaussian_kernel_1d(sigma).to(data.device)
+    kernel_1d = gaussian_kernel_1d(sigma).to(data.device, dtype=data.dtype)
     padding = len(kernel_1d) // 2
     data = data.unsqueeze(1) if len(data.shape) == 2 else data
     data = conv1d(data, weight=kernel_1d.view(1, 1, -1), padding=padding)
